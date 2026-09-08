@@ -1,8 +1,8 @@
 function p = uncertainty_eeg_params
 
-p.eeg_file = 'cupcake_S0085_allcat_oref_nofilt.mat';
-p.trial_file = 'cupcake_S0085_allcat.mat';
-p.timewindow = [-200, 1200];
+p.eeg_file = 'PDAT_sample_EEG.mat';
+p.trial_file = 'PDAT_sample_trialSequence.mat';
+p.timewindow = [-100, 500];
 
 %what feature to decode (from expt.trialsPresented)
 p.feature = 'theta';
@@ -100,6 +100,8 @@ p.nsets = 1;
 p.chan_exp = 5;
 %number of bins to discretize possible stimulus values
 p.nbinsstimval = 100;
+p.binvals = linspace(0, 2*pi, p.nbinsstimval+1)';
+p.binvals(end) = [];
 %size of time bins
 p.msperbin = 10;
 %non-overlapping bins if 0, else index t will have info from (t,t+msperbin-1)

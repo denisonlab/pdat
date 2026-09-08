@@ -1,4 +1,33 @@
-function [outp, uncertainty, posteriors, covparams] = TAFKAP_decode(t, train, test, p, ttest,lambda_var, lambda)
+function [outp, uncertainty, posteriors, covparams] = TAFKAP_decode(t, train, test, p, ttest)
+%this function decodes one time point
+%conventions: T = number of time points, Ntrain = number of training trials, Ntest = number of testing trials, D = number of channels
+%INPUTS:
+
+%%t: the time point you are training on
+
+%%train and test: structs, each containing the following fields
+%allsamples - your signal!: T x D x [Ntrain/Ntest]
+%resp - basis tuning function responses for each trial: p.nsets x [Ntrain/Ntest] x p.nchan
+% train also must contain 
+%   boot.sets: 1 x p.nboot, containing the index of the basis function set for that bagging iteration
+%   boot.idx: Ntrain x p.nboot, containing the indices of the trials within the training set for that bagging iteration
+%   cvid - cross-validation fold indices (for covariance fitting): 1 x Ntrain
+
+%%p: parameter struct, must contain the following fields (see uncertainty_eeg_params.m for reasonable defaults)
+%loocv: logical indicates whether you're using leave-one-out (i.e., Ntest = 1)
+%crosstime: logical indicates whether you're doing temporal generalization
+%nboot: number of bagging iterations
+%outpmethod: way of getting the stimulus estimate from the probability distribution - "max" or "pop_vec" 
+%uncmethod: way of getting the uncertainty estimate from the probability distribution - "pop_vec", "max", "entropy" or "chan_sum"
+%covmethod: covariance structure - see fitcov.m
+%lossmethod: loss function used for cross-validation fitting of covariance parameters - see fitcov.m
+%regressionmethod: way of fitting the weight matrix - "OLS", "lasso", "ridge", "FLS" see fitweights.m
+%binvals, basis_resp: discretized stimulus values (1 x nbinsstimval) and basis tuning function responses to those stimulus values (nbinsstimval x k x nsets), resp.
+
+
+%smooth_alpha: exponent for covariance smoothing (eigenvalues <= 0 are set to 10^(-smooth_alpha))
+%
+
 % warning('off', 'MATLAB:rankDeficientMatrix');
 % warning('off', 'MATLAB:nearlySingularMatrix');
 % warning('off', 'MATLAB:singularMatrix');
@@ -43,7 +72,7 @@ while b<=p.nboot
     idx = train.boot.idx(:,b);
     boot_samples = train_samples(:,idx);
     boot_resp = train_resp(idx,:,set);
-    boot_cvid = train.cvid(:,idx);
+    boot_cvid = train.cvid(idx);
     
     W = fitweights(boot_samples', boot_resp, t, boot_cvid, p, b);
 
